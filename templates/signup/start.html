@@ -1,0 +1,139 @@
+{% extends "signup/base.html" %}
+{% set current_step = 1 %}
+
+{% block title %}Create Your Photography Studio - PhotoProof{% endblock %}
+
+{% block content %}
+<h1 class="onboarding-title">Create Your Photography Studio</h1>
+<p class="onboarding-subtitle">Start your 14-day free trial. No credit card required.</p>
+
+<form method="POST" id="signup-form">
+    <!-- Studio Name -->
+    <div class="form-group">
+        <label class="form-label">
+            Studio Name <span class="required">*</span>
+        </label>
+        <input type="text" name="studio_name" class="form-input" required
+               placeholder="e.g., Awesome Photography Studio"
+               value="{{ request.form.get('studio_name', '') }}">
+    </div>
+    
+    <!-- Domain -->
+    <div class="form-group">
+        <label class="form-label">
+            Your Domain <span class="required">*</span>
+        </label>
+        <input type="text" name="domain" id="domain" class="form-input" required
+               placeholder="e.g., gallery.yourstudio.com"
+               value="{{ request.form.get('domain', '') }}">
+        <p class="form-hint">Enter your custom domain where clients will access your studio</p>
+        <div id="domain-status"></div>
+    </div>
+    
+    <!-- Email -->
+    <div class="form-group">
+        <label class="form-label">
+            Email Address <span class="required">*</span>
+        </label>
+        <input type="email" name="email" class="form-input" required
+               placeholder="you@yourstudio.com"
+               value="{{ request.form.get('email', '') }}">
+    </div>
+    
+    <!-- Owner Name -->
+    <div class="form-group">
+        <label class="form-label">
+            Your Name <span class="required">*</span>
+        </label>
+        <input type="text" name="owner_name" class="form-input" required
+               placeholder="John Doe"
+               value="{{ request.form.get('owner_name', '') }}">
+    </div>
+    
+    <!-- Password -->
+    <div class="form-group">
+        <label class="form-label">
+            Password <span class="required">*</span>
+        </label>
+        <input type="password" name="password" id="password" class="form-input" required
+               minlength="8" placeholder="At least 8 characters">
+        <p class="form-hint">Must be at least 8 characters long</p>
+    </div>
+    
+    <!-- Confirm Password -->
+    <div class="form-group">
+        <label class="form-label">
+            Confirm Password <span class="required">*</span>
+        </label>
+        <input type="password" name="confirm_password" class="form-input" required
+               placeholder="Re-enter your password">
+    </div>
+    
+    <!-- Phone (Optional) -->
+    <div class="form-group">
+        <label class="form-label">
+            Phone Number <span class="optional">(Optional)</span>
+        </label>
+        <input type="tel" name="phone" class="form-input"
+               placeholder="+1 (555) 123-4567"
+               value="{{ request.form.get('phone', '') }}">
+    </div>
+    
+    <button type="submit" class="btn-submit" id="submit-btn">
+        Continue to Plan Selection
+    </button>
+    
+    <p class="terms-text">
+        By continuing, you agree to our Terms of Service and Privacy Policy
+    </p>
+</form>
+
+<script>
+// Domain availability check
+let timeout = null;
+const domainInput = document.getElementById('domain');
+const statusEl = document.getElementById('domain-status');
+
+domainInput.addEventListener('input', function() {
+    clearTimeout(timeout);
+    const domain = this.value.trim();
+    
+    if (domain.length < 4) {
+        statusEl.innerHTML = '';
+        return;
+    }
+    
+    statusEl.innerHTML = '<span class="status-checking"><span class="spinner"></span> Checking availability...</span>';
+    
+    timeout = setTimeout(() => {
+        fetch('/api/check-domain?domain=' + encodeURIComponent(domain))
+            .then(r => r.json())
+            .then(data => {
+                if (data.available) {
+                    statusEl.innerHTML = '<span class="status-available">✓ Domain available</span>';
+                } else {
+                    statusEl.innerHTML = '<span class="status-unavailable">✗ Domain already registered</span>';
+                }
+            })
+            .catch(() => {
+                statusEl.innerHTML = '';
+            });
+    }, 500);
+});
+
+// Form validation
+document.getElementById('signup-form').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirm = document.querySelector('input[name="confirm_password"]').value;
+    
+    if (password !== confirm) {
+        e.preventDefault();
+        alert('Passwords do not match');
+        return false;
+    }
+    
+    document.getElementById('submit-btn').innerHTML = '<span class="spinner"></span> Creating Studio...';
+    document.getElementById('submit-btn').disabled = true;
+});
+</script>
+{% endblock %}

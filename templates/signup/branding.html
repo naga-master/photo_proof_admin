@@ -1,0 +1,677 @@
+{% extends "signup/base.html" %}
+{% set current_step = 3 %}
+
+{% block title %}Branding - PhotoProof{% endblock %}
+
+{% block content %}
+<h1 class="onboarding-title">Customize Your Branding</h1>
+<p class="onboarding-subtitle">Make your studio stand out with custom colors and fonts.</p>
+<form method="POST" action="{{ url_for('signup_branding') }}" enctype="multipart/form-data" id="brandingForm">
+    <!-- Brand Color -->
+    <div class="form-group">
+        <label class="form-label">Brand Color</label>
+        
+        <!-- Color Presets -->
+        <div class="color-presets">
+            <button type="button" class="color-preset selected" data-color="#0EA5E9" style="--preset-color: #0EA5E9;">
+                <span class="color-swatch"></span>
+                <span class="color-name">Teal</span>
+            </button>
+            <button type="button" class="color-preset" data-color="#6366F1" style="--preset-color: #6366F1;">
+                <span class="color-swatch"></span>
+                <span class="color-name">Indigo</span>
+            </button>
+            <button type="button" class="color-preset" data-color="#A855F7" style="--preset-color: #A855F7;">
+                <span class="color-swatch"></span>
+                <span class="color-name">Purple</span>
+            </button>
+            <button type="button" class="color-preset" data-color="#EC4899" style="--preset-color: #EC4899;">
+                <span class="color-swatch"></span>
+                <span class="color-name">Pink</span>
+            </button>
+            <button type="button" class="color-preset" data-color="#F43F5E" style="--preset-color: #F43F5E;">
+                <span class="color-swatch"></span>
+                <span class="color-name">Rose</span>
+            </button>
+            <button type="button" class="color-preset" data-color="#F97316" style="--preset-color: #F97316;">
+                <span class="color-swatch"></span>
+                <span class="color-name">Orange</span>
+            </button>
+            <button type="button" class="color-preset" data-color="#10B981" style="--preset-color: #10B981;">
+                <span class="color-swatch"></span>
+                <span class="color-name">Emerald</span>
+            </button>
+            <button type="button" class="color-preset" data-color="#64748B" style="--preset-color: #64748B;">
+                <span class="color-swatch"></span>
+                <span class="color-name">Slate</span>
+            </button>
+        </div>
+
+        <!-- Custom Color -->
+        <div class="custom-color">
+            <span class="custom-color-label">Or choose custom:</span>
+            <input type="color" id="colorPicker" value="#0EA5E9">
+            <input type="text" id="colorHex" name="brand_color" value="#0EA5E9" pattern="^#[0-9A-Fa-f]{6}$" class="form-control color-hex-input">
+        </div>
+    </div>
+
+    <!-- Studio Logo -->
+    <div class="form-group">
+        <label class="form-label">
+            Studio Logo
+            <span class="optional-label">(Optional)</span>
+        </label>
+        <p class="form-hint">Your logo appears on invoices, emails, and client portal headers.</p>
+
+        <div class="upload-area" id="logoUploadArea">
+            <input type="file" id="logoInput" name="logo" accept="image/*" class="upload-input">
+            <div class="upload-placeholder" id="logoPlaceholder">
+                <span class="upload-icon">🏢</span>
+                <p class="upload-text">Drop logo here or click to upload</p>
+                <p class="upload-hint">PNG or SVG recommended, max 2MB</p>
+            </div>
+            <div class="upload-preview" id="logoPreview" style="display: none;">
+                <img id="logoPreviewImg" src="" alt="Logo Preview">
+                <p class="upload-success">Logo uploaded!</p>
+                <button type="button" class="btn-remove" onclick="removeLogo()">Remove</button>
+            </div>
+        </div>
+
+        <label class="skip-checkbox">
+            <input type="checkbox" name="skip_logo" id="skipLogo">
+            <span>I'll add this later</span>
+        </label>
+    </div>
+
+    <!-- Typography -->
+    <div class="form-group">
+        <label class="form-label">Typography</label>
+        
+        <div class="typography-options">
+            <label class="typography-option selected">
+                <input type="radio" name="typography" value="Modern (Inter)" checked>
+                <span class="typography-name">Modern (Inter)</span>
+                <span class="typography-preview" style="font-family: Inter, sans-serif;">Clean & Professional</span>
+            </label>
+            <label class="typography-option">
+                <input type="radio" name="typography" value="Elegant (Cormorant)">
+                <span class="typography-name">Elegant (Cormorant)</span>
+                <span class="typography-preview" style="font-family: Georgia, serif;">Sophisticated & Classic</span>
+            </label>
+            <label class="typography-option">
+                <input type="radio" name="typography" value="System Default (Inter & Cormorant)">
+                <span class="typography-name">System Default</span>
+                <span class="typography-preview">Balanced Mix</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- About Page Image -->
+    <div class="form-group" style="border-top: 1px solid #e5e7eb; padding-top: 2rem; margin-top: 2rem;">
+        <label class="form-label">
+            About Page Image
+            <span class="optional-label">(Optional)</span>
+        </label>
+        <p class="form-hint">This image appears on your public About page to introduce your studio.</p>
+
+        <!-- Image Type Selector -->
+        <div class="image-type-selector">
+            <button type="button" class="image-type-btn selected" data-type="owner">
+                <span class="type-icon">👤</span>
+                <span class="type-label">Owner Photo</span>
+                <span class="type-desc">Personal touch</span>
+            </button>
+            <button type="button" class="image-type-btn" data-type="team">
+                <span class="type-icon">👥</span>
+                <span class="type-label">Team Photo</span>
+                <span class="type-desc">Show your team</span>
+            </button>
+            <button type="button" class="image-type-btn" data-type="workspace">
+                <span class="type-icon">📸</span>
+                <span class="type-label">Workspace</span>
+                <span class="type-desc">Studio shots</span>
+            </button>
+        </div>
+        <input type="hidden" name="image_type" id="imageType" value="owner">
+
+        <div class="upload-area" id="photoUploadArea">
+            <input type="file" id="photoInput" name="studio_photo" accept="image/*" class="upload-input">
+            <div class="upload-placeholder" id="photoPlaceholder">
+                <span class="upload-icon">📷</span>
+                <p class="upload-text">Drop image here or click to upload</p>
+                <p class="upload-hint">Recommended: 800x800px, JPG or PNG, max 5MB</p>
+            </div>
+            <div class="upload-preview" id="photoPreview" style="display: none;">
+                <img id="photoPreviewImg" src="" alt="Photo Preview">
+                <p class="upload-success">Image uploaded!</p>
+                <button type="button" class="btn-remove" onclick="removePhoto()">Remove</button>
+            </div>
+        </div>
+
+        <label class="skip-checkbox">
+            <input type="checkbox" name="skip_photo" id="skipPhoto">
+            <span>I'll add this later from my dashboard</span>
+        </label>
+    </div>
+
+    <!-- Preview -->
+    <div class="preview-box">
+        <p class="preview-title">Preview</p>
+        <button type="button" class="preview-button" id="previewButton" style="background-color: #0EA5E9;">
+            View Gallery
+        </button>
+        <p class="preview-hint">This is how your buttons and accents will look with your chosen colors.</p>
+    </div>
+
+    {% if error %}
+    <div class="error-box">
+        <strong>Error</strong>
+        <p>{{ error }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="form-actions">
+        <a href="{{ url_for('signup_plan') }}" class="btn btn-secondary">Back</a>
+        <button type="submit" class="btn btn-primary">Continue</button>
+    </div>
+
+    <p class="form-footer">Don't worry, you can change these settings anytime from your dashboard.</p>
+</form>
+
+<style>
+/* Color Presets */
+.color-presets {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.color-preset {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.color-preset:hover {
+    border-color: #d1d5db;
+}
+
+.color-preset.selected {
+    border-color: #1e293b;
+    background: #f9fafb;
+}
+
+.color-swatch {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--preset-color);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.color-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Custom Color */
+.custom-color {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.custom-color-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.custom-color input[type="color"] {
+    width: 4rem;
+    height: 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.color-hex-input {
+    width: 100px;
+    font-family: monospace;
+    font-size: 0.875rem;
+}
+
+/* Upload Areas */
+.upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+}
+
+.upload-area:hover {
+    border-color: #9ca3af;
+    background: #f9fafb;
+}
+
+.upload-area.drag-active {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.upload-area.has-file {
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+.upload-input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.upload-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.upload-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin: 0;
+}
+
+.upload-hint {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin: 0.25rem 0 0;
+}
+
+.upload-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.upload-preview img {
+    max-height: 100px;
+    max-width: 200px;
+    object-fit: contain;
+    border-radius: 0.5rem;
+}
+
+.upload-success {
+    font-size: 0.875rem;
+    color: #16a34a;
+    font-weight: 500;
+    margin: 0;
+}
+
+.btn-remove {
+    font-size: 0.875rem;
+    color: #ef4444;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    color: #dc2626;
+}
+
+/* Skip Checkbox */
+.skip-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.skip-checkbox input {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Typography Options */
+.typography-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.typography-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.typography-option:hover {
+    border-color: #d1d5db;
+}
+
+.typography-option.selected {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.typography-option input {
+    display: none;
+}
+
+.typography-name {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.typography-preview {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-left: auto;
+}
+
+/* Image Type Selector */
+.image-type-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.image-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.image-type-btn:hover {
+    border-color: #d1d5db;
+}
+
+.image-type-btn.selected {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.type-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.type-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.type-desc {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+/* Preview Box */
+.preview-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    margin-top: 2rem;
+}
+
+.preview-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin: 0 0 1rem;
+}
+
+.preview-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+
+.preview-button:hover {
+    transform: scale(1.02);
+}
+
+.preview-hint {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 1rem 0 0;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.form-actions .btn {
+    flex: 1;
+}
+
+.form-footer {
+    text-align: center;
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin-top: 1rem;
+}
+
+.optional-label {
+    font-weight: normal;
+    color: #9ca3af;
+    margin-left: 0.5rem;
+}
+
+.form-hint {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0 0 1rem;
+}
+
+.error-box {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: #b91c1c;
+    margin-top: 1rem;
+}
+
+.error-box strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.error-box p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+    .color-presets {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .image-type-selector {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Color preset selection
+    const colorPresets = document.querySelectorAll('.color-preset');
+    const colorPicker = document.getElementById('colorPicker');
+    const colorHex = document.getElementById('colorHex');
+    const previewButton = document.getElementById('previewButton');
+
+    function updateColor(color) {
+        colorPicker.value = color;
+        colorHex.value = color;
+        previewButton.style.backgroundColor = color;
+        
+        colorPresets.forEach(preset => {
+            preset.classList.toggle('selected', preset.dataset.color === color);
+        });
+    }
+
+    colorPresets.forEach(preset => {
+        preset.addEventListener('click', () => {
+            updateColor(preset.dataset.color);
+        });
+    });
+
+    colorPicker.addEventListener('input', (e) => {
+        updateColor(e.target.value);
+    });
+
+    colorHex.addEventListener('change', (e) => {
+        if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) {
+            updateColor(e.target.value);
+        }
+    });
+
+    // Typography selection
+    const typographyOptions = document.querySelectorAll('.typography-option');
+    typographyOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            typographyOptions.forEach(o => o.classList.remove('selected'));
+            option.classList.add('selected');
+            option.querySelector('input').checked = true;
+        });
+    });
+
+    // Image type selection
+    const imageTypeBtns = document.querySelectorAll('.image-type-btn');
+    const imageTypeInput = document.getElementById('imageType');
+    imageTypeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            imageTypeBtns.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            imageTypeInput.value = btn.dataset.type;
+        });
+    });
+
+    // Logo upload
+    const logoInput = document.getElementById('logoInput');
+    const logoUploadArea = document.getElementById('logoUploadArea');
+    const logoPlaceholder = document.getElementById('logoPlaceholder');
+    const logoPreview = document.getElementById('logoPreview');
+    const logoPreviewImg = document.getElementById('logoPreviewImg');
+    const skipLogo = document.getElementById('skipLogo');
+
+    logoInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Logo must be less than 2MB');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                logoPreviewImg.src = e.target.result;
+                logoPlaceholder.style.display = 'none';
+                logoPreview.style.display = 'flex';
+                logoUploadArea.classList.add('has-file');
+                skipLogo.checked = false;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Photo upload
+    const photoInput = document.getElementById('photoInput');
+    const photoUploadArea = document.getElementById('photoUploadArea');
+    const photoPlaceholder = document.getElementById('photoPlaceholder');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoPreviewImg = document.getElementById('photoPreviewImg');
+    const skipPhoto = document.getElementById('skipPhoto');
+
+    photoInput.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Image must be less than 5MB');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                photoPreviewImg.src = e.target.result;
+                photoPlaceholder.style.display = 'none';
+                photoPreview.style.display = 'flex';
+                photoUploadArea.classList.add('has-file');
+                skipPhoto.checked = false;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Skip checkbox handlers
+    skipLogo.addEventListener('change', (e) => {
+        logoUploadArea.style.opacity = e.target.checked ? '0.5' : '1';
+        logoUploadArea.style.pointerEvents = e.target.checked ? 'none' : 'auto';
+    });
+
+    skipPhoto.addEventListener('change', (e) => {
+        photoUploadArea.style.opacity = e.target.checked ? '0.5' : '1';
+        photoUploadArea.style.pointerEvents = e.target.checked ? 'none' : 'auto';
+        imageTypeBtns.forEach(btn => {
+            btn.style.opacity = e.target.checked ? '0.5' : '1';
+            btn.style.pointerEvents = e.target.checked ? 'none' : 'auto';
+        });
+    });
+});
+
+function removeLogo() {
+    document.getElementById('logoInput').value = '';
+    document.getElementById('logoPlaceholder').style.display = 'block';
+    document.getElementById('logoPreview').style.display = 'none';
+    document.getElementById('logoUploadArea').classList.remove('has-file');
+}
+
+function removePhoto() {
+    document.getElementById('photoInput').value = '';
+    document.getElementById('photoPlaceholder').style.display = 'block';
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('photoUploadArea').classList.remove('has-file');
+}
+</script>
+{% endblock %}

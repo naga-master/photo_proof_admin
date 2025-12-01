@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Features - PhotoProof Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Feature Management</h1>
+
+<!-- Studio Selector -->
+<div class="card mb-4">
+    <form method="GET" class="flex gap-2" style="align-items: flex-end;">
+        <div class="form-group" style="margin-bottom: 0; flex: 1;">
+            <label class="form-label">Select Studio</label>
+            <select name="studio_id" class="form-control" onchange="this.form.submit()">
+                <option value="">-- Select a studio --</option>
+                {% for studio in studios %}
+                <option value="{{ studio.id }}" {{ 'selected' if selected_studio and selected_studio.id == studio.id }}>
+                    {{ studio.name }} ({{ 'Active' if studio.onboarding_completed else 'Pending' }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+</div>
+
+{% if selected_studio %}
+<!-- Feature Toggles -->
+<div class="card">
+    <div class="card-header">
+        <h3>Features for: {{ selected_studio.name }}</h3>
+        <p class="text-muted" style="margin: 0;">Current Plan: {{ selected_studio.subscription_tier }}</p>
+    </div>
+    
+    <div class="grid grid-2 gap-2 mt-2">
+        {% for feature_key, feature_info in features.items() %}
+        <div style="padding: 1rem; border: 1px solid var(--border); border-radius: 0.375rem;">
+            <div class="flex-between">
+                <div>
+                    <strong>{{ feature_info.name }}</strong>
+                    <p class="text-muted" style="font-size: 0.875rem; margin: 0;">{{ feature_info.description }}</p>
+                    {% if selected_studio.subscription_tier in feature_info.default_plans %}
+                        <span class="badge badge-success" style="margin-top: 0.5rem;">Included in plan</span>
+                    {% else %}
+                        <span class="badge badge-warning" style="margin-top: 0.5rem;">Not in plan</span>
+                    {% endif %}
+                </div>
+                <form method="POST" action="{{ url_for('toggle_studio_feature', studio_id=selected_studio.id) }}">
+                    <input type="hidden" name="feature_key" value="{{ feature_key }}">
+                    <input type="hidden" name="enabled" value="{{ 'false' if studio_features.get(feature_key, selected_studio.subscription_tier in feature_info.default_plans) else 'true' }}">
+                    <label class="toggle">
+                        <input type="checkbox" 
+                               {{ 'checked' if studio_features.get(feature_key, selected_studio.subscription_tier in feature_info.default_plans) }}
+                               onchange="this.form.submit()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <p class="text-center text-muted">Select a studio to manage its features</p>
+</div>
+{% endif %}
+{% endblock %}

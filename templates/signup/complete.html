@@ -1,0 +1,170 @@
+{% extends "signup/base.html" %}
+{% set current_step = 4 %}
+
+{% block title %}Welcome! - PhotoProof{% endblock %}
+
+{% block head %}
+<style>
+    .success-icon {
+        font-size: 4rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .success-title {
+        text-align: center;
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+    
+    .success-subtitle {
+        text-align: center;
+        color: #475569;
+        margin-bottom: 2rem;
+    }
+    
+    .next-steps {
+        margin: 2rem 0;
+    }
+    
+    .next-step {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        align-items: flex-start;
+    }
+    
+    .step-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.75rem;
+        height: 1.75rem;
+        background: #fef3c7;
+        color: #92400e;
+        border-radius: 50%;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .step-content strong {
+        display: block;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+    }
+    
+    .step-content p {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin: 0;
+    }
+    
+    .dns-section {
+        background: #f8fafc;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .dns-section h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+    
+    .dns-section p {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+    
+    .dns-code {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        font-family: 'Monaco', 'Menlo', monospace;
+        font-size: 0.875rem;
+        overflow-x: auto;
+    }
+    
+    .support-text {
+        text-align: center;
+        color: #64748b;
+        font-size: 0.875rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        margin-top: 2rem;
+    }
+    
+    .btn-another {
+        display: inline-block;
+        margin-top: 1.5rem;
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #4f46e5;
+        color: #4f46e5;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    
+    .btn-another:hover {
+        background: #4f46e5;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-icon">🎉</div>
+<h1 class="success-title">Your Studio is Being Set Up!</h1>
+<p class="success-subtitle">Registration successful. We're preparing your studio.</p>
+
+<div class="next-steps">
+    <div class="next-step">
+        <span class="step-badge">1</span>
+        <div class="step-content">
+            <strong>Domain Provisioning</strong>
+            <p>We're setting up your domain: <code>{{ domain }}</code></p>
+        </div>
+    </div>
+    
+    <div class="next-step">
+        <span class="step-badge">2</span>
+        <div class="step-content">
+            <strong>Email Confirmation</strong>
+            <p>You'll receive an email with DNS instructions and login details.</p>
+        </div>
+    </div>
+    
+    <div class="next-step">
+        <span class="step-badge">3</span>
+        <div class="step-content">
+            <strong>Access Your Studio</strong>
+            <p>Once provisioning is complete (usually 10-30 minutes), you can log in!</p>
+        </div>
+    </div>
+</div>
+
+<div class="dns-section">
+    <h3>DNS Configuration</h3>
+    <p>Add this CNAME record to your domain's DNS settings:</p>
+    <div class="dns-code">
+Type: CNAME
+Name: {{ domain.split('.')[0] if '.' in domain else domain }}
+Value: app.photoproof.com
+    </div>
+</div>
+
+<p class="support-text">
+    Questions? Contact us at <a href="mailto:support@photoproof.com" style="color: #4f46e5;">support@photoproof.com</a>
+</p>
+
+<div style="text-align: center;">
+    <a href="{{ url_for('signup') }}" class="btn-another">Sign Up Another Studio</a>
+</div>
+{% endblock %}

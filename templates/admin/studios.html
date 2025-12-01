@@ -1,0 +1,83 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Studios - PhotoProof Admin{% endblock %}
+
+{% block content %}
+<div class="flex-between mb-4">
+    <h1>Studios</h1>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <form method="GET" class="flex gap-2" style="align-items: flex-end;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-control">
+                <option value="all" {{ 'selected' if status_filter == 'all' }}>All</option>
+                <option value="active" {{ 'selected' if status_filter == 'active' }}>Active</option>
+                <option value="pending" {{ 'selected' if status_filter == 'pending' }}>Pending</option>
+                <option value="inactive" {{ 'selected' if status_filter == 'inactive' }}>Inactive</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0; flex: 1;">
+            <label class="form-label">Search</label>
+            <input type="text" name="search" class="form-control" value="{{ search }}" placeholder="Search by name...">
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+</div>
+
+<!-- Studios Table -->
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Studio</th>
+                <th>Domain</th>
+                <th>Plan</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for studio in studios %}
+            <tr>
+                <td>
+                    <strong>{{ studio.name }}</strong>
+                    <div class="text-muted" style="font-size: 0.875rem;">{{ studio.email }}</div>
+                </td>
+                <td>
+                    <code style="font-size: 0.875rem;">{{ studio.domains[0].domain if studio.domains else 'N/A' }}</code>
+                </td>
+                <td>{{ studio.subscription_tier }}</td>
+                <td>
+                    {% if studio.onboarding_completed and studio.is_active %}
+                        <span class="badge badge-success">Active</span>
+                    {% elif not studio.onboarding_completed %}
+                        <span class="badge badge-warning">Pending</span>
+                    {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ studio.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <div class="flex gap-1">
+                        <a href="{{ url_for('admin_features', studio_id=studio.id) }}" class="btn btn-sm btn-outline">Features</a>
+                        <form method="POST" action="{{ url_for('toggle_studio', studio_id=studio.id) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-sm {{ 'btn-danger' if studio.is_active else 'btn-success' }}">
+                                {{ 'Disable' if studio.is_active else 'Enable' }}
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted">No studios found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

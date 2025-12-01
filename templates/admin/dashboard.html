@@ -1,0 +1,77 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Dashboard - PhotoProof Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<!-- Metrics -->
+<div class="grid grid-4 gap-2 mb-4">
+    <div class="card metric">
+        <div class="metric-value">{{ total_studios }}</div>
+        <div class="metric-label">Total Studios</div>
+    </div>
+    <div class="card metric">
+        <div class="metric-value">{{ active_studios }}</div>
+        <div class="metric-label">Active Studios</div>
+    </div>
+    <div class="card metric">
+        <div class="metric-value" style="color: {{ '#f59e0b' if pending_studios > 0 else 'inherit' }}">{{ pending_studios }}</div>
+        <div class="metric-label">Pending Setup</div>
+    </div>
+    <div class="card metric">
+        <div class="metric-value">{{ total_users }}</div>
+        <div class="metric-label">Total Users</div>
+    </div>
+</div>
+
+<div class="grid grid-2 gap-2">
+    <!-- Recent Signups -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Recent Signups</h3>
+        </div>
+        {% if recent_studios %}
+            {% for studio in recent_studios %}
+            <div style="padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
+                <div class="flex-between">
+                    <strong>{{ studio.name }}</strong>
+                    <span class="badge {{ 'badge-success' if studio.onboarding_completed else 'badge-warning' }}">
+                        {{ 'Active' if studio.onboarding_completed else 'Pending' }}
+                    </span>
+                </div>
+                <div class="text-muted" style="font-size: 0.875rem;">
+                    {{ studio.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No studios yet</p>
+        {% endif %}
+    </div>
+    
+    <!-- Pending Provisioning -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Pending Provisioning</h3>
+        </div>
+        {% if pending_list %}
+            {% for studio in pending_list %}
+            <div style="padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
+                <div class="flex-between">
+                    <div>
+                        <strong>{{ studio.name }}</strong>
+                        <div class="text-muted" style="font-size: 0.875rem;">
+                            {{ studio.domains[0].domain if studio.domains else 'No domain' }}
+                        </div>
+                    </div>
+                    <a href="{{ url_for('admin_provisioning') }}" class="btn btn-sm btn-primary">Provision</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-success">No pending provisioning requests!</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

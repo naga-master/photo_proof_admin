@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PhotoProof{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Onboarding specific styles - matching React app */
+        .onboarding-page {
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+        }
+        
+        .onboarding-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .onboarding-container {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+        
+        /* Progress Steps */
+        .steps-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .step-circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            background: white;
+            color: #94a3b8;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .step.completed .step-circle {
+            border-color: #16a34a;
+            background: #16a34a;
+            color: white;
+        }
+        
+        .step.active .step-circle {
+            border-color: #4f46e5;
+            background: #4f46e5;
+            color: white;
+        }
+        
+        .step-label {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+        
+        .step.completed .step-label,
+        .step.active .step-label {
+            color: #0f172a;
+        }
+        
+        .step-line {
+            flex: 1;
+            height: 4px;
+            margin: 0 1rem;
+            background: #cbd5e1;
+            border-radius: 2px;
+            transition: background 0.3s;
+        }
+        
+        .step-line.completed {
+            background: #16a34a;
+        }
+        
+        /* Content Card */
+        .onboarding-content {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        .onboarding-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+        }
+        
+        .onboarding-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .onboarding-subtitle {
+            color: #475569;
+            margin-bottom: 2rem;
+        }
+        
+        /* Form Styles */
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-label .required {
+            color: #ef4444;
+        }
+        
+        .form-label .optional {
+            color: #94a3b8;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        .form-hint {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Input with suffix */
+        .input-with-suffix {
+            display: flex;
+        }
+        
+        .input-with-suffix .form-input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .input-suffix {
+            padding: 0.5rem 1rem;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-left: 0;
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+            color: #475569;
+            white-space: nowrap;
+        }
+        
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            background: #4f46e5;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .btn-submit:hover {
+            background: #4338ca;
+        }
+        
+        .btn-submit:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        
+        /* Status Messages */
+        .status-checking {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .status-available {
+            color: #16a34a;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .status-unavailable {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Error Alert */
+        .error-alert {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            color: #b91c1c;
+            margin-bottom: 1.5rem;
+        }
+        
+        .error-alert strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Footer */
+        .onboarding-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .onboarding-footer a {
+            color: #4f46e5;
+            text-decoration: none;
+        }
+        
+        .onboarding-footer a:hover {
+            color: #4338ca;
+        }
+        
+        /* Spinner */
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Terms text */
+        .terms-text {
+            text-align: center;
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 1rem;
+        }
+        
+        /* Back button */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-back:hover {
+            color: #334155;
+        }
+        
+        .btn-back svg {
+            margin-right: 0.5rem;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="onboarding-page">
+    <!-- Progress Header -->
+    <div class="onboarding-header">
+        <div class="onboarding-container">
+            <div class="steps-container">
+                {% set steps = [
+                    {'id': 1, 'label': 'Get Started'},
+                    {'id': 2, 'label': 'Choose Plan'},
+                    {'id': 3, 'label': 'Branding'},
+                    {'id': 4, 'label': 'Complete'}
+                ] %}
+                {% for step in steps %}
+                    <div class="step {{ 'completed' if step.id < current_step else 'active' if step.id == current_step else '' }}">
+                        <div class="step-circle">
+                            {% if step.id < current_step %}✓{% else %}{{ step.id }}{% endif %}
+                        </div>
+                        <span class="step-label">{{ step.label }}</span>
+                    </div>
+                    {% if not loop.last %}
+                        <div class="step-line {{ 'completed' if step.id < current_step else '' }}"></div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Content -->
+    <div class="onboarding-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="error-alert" style="margin-bottom: 1rem;">
+                        <strong>{{ 'Error' if category == 'error' else 'Notice' }}</strong>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="onboarding-card">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="onboarding-footer">
+        Need help? Contact <a href="mailto:support@photoproof.com">support@photoproof.com</a>
+    </div>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,188 @@
+{% extends "signup/base.html" %}
+{% set current_step = 2 %}
+
+{% block title %}Choose Your Plan - PhotoProof{% endblock %}
+
+{% block head %}
+<style>
+    .plans-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .plans-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .plan-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+    }
+    
+    .plan-card:hover {
+        border-color: #4f46e5;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .plan-card.selected {
+        border-color: #4f46e5;
+        background: rgba(79, 70, 229, 0.05);
+    }
+    
+    .plan-card.selected::after {
+        content: '✓';
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        background: #4f46e5;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+    }
+    
+    .plan-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.5rem;
+    }
+    
+    .plan-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4f46e5;
+    }
+    
+    .plan-price span {
+        font-size: 1rem;
+        color: #64748b;
+        font-weight: 400;
+    }
+    
+    .plan-yearly {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin-bottom: 1rem;
+    }
+    
+    .plan-features {
+        list-style: none;
+        text-align: left;
+        padding: 0;
+        margin: 1rem 0;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 1rem;
+    }
+    
+    .plan-features li {
+        padding: 0.5rem 0;
+        font-size: 0.875rem;
+        color: #334155;
+    }
+    
+    .plan-features li::before {
+        content: '✓';
+        color: #16a34a;
+        margin-right: 0.5rem;
+    }
+    
+    .plan-includes {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+        text-align: left;
+    }
+    
+    .plan-includes-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    
+    .plan-includes ul {
+        list-style: disc;
+        padding-left: 1.25rem;
+        font-size: 0.875rem;
+        color: #475569;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('signup') }}" class="btn-back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    Back
+</a>
+
+<h1 class="onboarding-title">Choose Your Plan</h1>
+<p class="onboarding-subtitle">All plans include a 14-day free trial. Cancel anytime.</p>
+
+<form method="POST" id="plan-form">
+    <input type="hidden" name="plan" id="selected-plan" value="starter">
+    
+    <div class="plans-grid">
+        {% for plan_key, plan in plans.items() %}
+        <div class="plan-card {{ 'selected' if plan_key == 'starter' }}" data-plan="{{ plan_key }}">
+            <div class="plan-name">{{ plan.name }}</div>
+            <div class="plan-price">
+                ₹{{ plan.price_monthly }}<span>/month</span>
+            </div>
+            <div class="plan-yearly">or ₹{{ plan.price_yearly }}/year</div>
+            
+            <ul class="plan-features">
+                <li>{{ 'Unlimited' if plan.max_projects == -1 else plan.max_projects }} Projects</li>
+                <li>{{ plan.max_storage_gb }} GB Storage</li>
+                <li>{{ 'Unlimited' if plan.max_users == -1 else plan.max_users }} Team Members</li>
+            </ul>
+            
+            {% set plan_features = [] %}
+            {% for feature_key, feature_info in features.items() %}
+                {% if plan_key in feature_info.default_plans %}
+                    {% set _ = plan_features.append(feature_info.name) %}
+                {% endif %}
+            {% endfor %}
+            {% if plan_features %}
+            <div class="plan-includes">
+                <div class="plan-includes-title">Includes:</div>
+                <ul>
+                    {% for f in plan_features %}
+                    <li>{{ f }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <button type="submit" class="btn-submit">Continue with Selected Plan</button>
+</form>
+
+<script>
+document.querySelectorAll('.plan-card').forEach(card => {
+    card.addEventListener('click', function() {
+        document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        document.getElementById('selected-plan').value = this.dataset.plan;
+    });
+});
+</script>
+{% endblock %}
