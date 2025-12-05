@@ -169,14 +169,13 @@ def create_studio(db, name: str, subdomain: str, domain: str, owner_email: str,
     db.add(studio_domain)
     
     # Create owner user
-    # Generate username from email
-    username = owner_email.split('@')[0] + '_' + str(uuid.uuid4())[:8]
+    # Use email as username for simpler login experience
     user = User(
         id=str(uuid.uuid4()),
         studio_id=studio.id,
         name=owner_name,
         email=owner_email,
-        username=username,
+        username=owner_email,
         password_hash=password_hash,
         role="studio_owner"
     )
